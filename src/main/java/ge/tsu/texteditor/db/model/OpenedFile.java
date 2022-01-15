@@ -1,4 +1,4 @@
-package ge.tsu.texteditor.db.model;
+package ge.tsu.texteditor.texteditor.db.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

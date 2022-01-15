@@ -1,11 +1,12 @@
-package ge.tsu.texteditor.db.repository;
+package ge.tsu.texteditor.texteditor.db.repository;
 
-import ge.tsu.texteditor.db.Database;
-import ge.tsu.texteditor.db.model.OpenedFile;
+import ge.tsu.texteditor.texteditor.db.Database;
+import ge.tsu.texteditor.texteditor.db.model.OpenedFile;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 @Slf4j
@@ -15,17 +16,15 @@ public class OpenedFileRepository {
     private static final String INSERT = "INSERT INTO OPENEDFILES(FILENAME) VALUES('%s')";
     private static final String DROP_TABLE = "DROP TABLE IF EXISTS OPENEDFILES;";
 
-    @SneakyThrows
-    public boolean createTable() {
+    public void createTable() throws SQLException {
         try (Statement statement = Database.getConnection().createStatement()) {
-            return statement.execute(CREATE_TABLE);
+            statement.executeUpdate(CREATE_TABLE);
         }
     }
 
-    @SneakyThrows
-    public void dropTable() {
+    public void dropTable() throws SQLException {
         try (Statement statement = Database.getConnection().createStatement()) {
-            statement.execute(DROP_TABLE);
+             statement.executeUpdate(DROP_TABLE);
         }
     }
 
@@ -49,6 +48,7 @@ public class OpenedFileRepository {
         return null;
     }
 
+    @SneakyThrows
     public static void main(String[] args) {
         OpenedFileRepository openedFileRepository = new OpenedFileRepository();
         openedFileRepository.dropTable();

@@ -1,4 +1,4 @@
-package ge.tsu.texteditor.db;
+package ge.tsu.texteditor.texteditor.db;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -23,9 +23,13 @@ public class DBConfig {
     private DBConfig() {
         Properties props = new Properties();
 
-        try(InputStream inputStream = DBConfig.class.getResourceAsStream("/db.properties")) {
+
+
+        try(InputStream inputStream = DBConfig.class.getResourceAsStream(isJUnitTest() ? "/test-db.properties" : "/db.properties")) {
             props.load(inputStream);
         }
+
+        System.out.println(isJUnitTest());
 
         jdbcUrl = props.getProperty("jdbc-url");
         username = props.getProperty("username");
@@ -37,5 +41,14 @@ public class DBConfig {
             INSTANCE = new DBConfig();
         }
         return INSTANCE;
+    }
+
+    private static boolean isJUnitTest() {
+        for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+            if (element.getClassName().startsWith("org.junit.")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

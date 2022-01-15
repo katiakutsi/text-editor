@@ -1,8 +1,7 @@
-package ge.tsu.texteditor.controller;
+package ge.tsu.texteditor.texteditor.controller;
 
-import ge.tsu.texteditor.db.model.OpenedFile;
-import ge.tsu.texteditor.db.repository.OpenedFileRepository;
-import javafx.collections.ObservableList;
+import ge.tsu.texteditor.texteditor.db.model.OpenedFile;
+import ge.tsu.texteditor.texteditor.db.repository.OpenedFileRepository;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -15,6 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -37,6 +37,7 @@ public class MainController implements Initializable {
 
     private Path chosenFile = null;
     private List<File> selectedFiles = new ArrayList<>();
+    private HashMap<File, Tab> openedTabs = new HashMap<>();
 
     public MainController() {
         fileOpenChooser = new FileChooser();
@@ -89,6 +90,8 @@ public class MainController implements Initializable {
                     tabPane.getTabs().add(tab);
                     selectionModel.select(tab);
 
+                    openedTabs.put(selectedFile, tab);
+
                     tab.setOnCloseRequest(new EventHandler<Event>() {
                         @Override
                         public void handle(Event arg0) {
@@ -96,8 +99,15 @@ public class MainController implements Initializable {
                         }
                     });
 
-                    selectedFiles.add(selectedFile);
+                    tab.setOnSelectionChanged(new EventHandler<Event>() {
+                        @Override
+                        public void handle(Event event) {
+//                            treeView.setSelectionModel();
+                        }
+                    });
 
+                    selectedFiles.add(selectedFile);
+                    log.info("Opened file: " + selectedFile.getName());
                     dataBaseStuff(selectedFile);
                 } else {
                     for (Tab tab : tabPane.getTabs()) {
@@ -117,6 +127,18 @@ public class MainController implements Initializable {
         if (selectedFolder != null) {
             chosenFile = selectedFolder.toPath();
             displayFileTree(selectedFolder);
+        }
+    }
+
+    @SneakyThrows
+    public void save(ActionEvent actionEvent) {
+
+        for(Map.Entry<File, Tab> entry: openedTabs.entrySet()) {
+            File file = entry.getKey();
+            Tab tab = entry.getValue();
+
+            TextArea textArea = (TextArea) tab.getContent();
+            Files.writeString(file.toPath(), textArea.getText());
         }
     }
 
@@ -158,7 +180,8 @@ public class MainController implements Initializable {
     private String getFullPathForSelectedTreeItem(TreeItem item) {
         StringBuilder pathBuilder = new StringBuilder();
         for (item = (TreeItem<String>) treeView.getSelectionModel().getSelectedItem();
-             item != null ; item = item.getParent()) {
+             item != null;
+             item = item.getParent()) {
 
             pathBuilder.insert(0, item.getValue());
             pathBuilder.insert(0, "/");
@@ -167,8 +190,10 @@ public class MainController implements Initializable {
         return chosenFile.getParent() + path;
     }
 
+    @SneakyThrows
     private void dataBaseStuff(File file) {
         openedFileRepository.createTable();
         openedFileRepository.save(new OpenedFile(file.getName()));
     }
+
 }

@@ -1,6 +1,6 @@
-package ge.tsu.texteditor;
+package ge.tsu.texteditor.texteditor;
 
-import ge.tsu.texteditor.controller.MainController;
+import ge.tsu.texteditor.texteditor.controller.MainController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,7 +16,7 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader();
         Parent mainRoot;
 
-        try(InputStream inputStream = App.class.getResourceAsStream("/ge/tsu/texteditor/views/main-view.fxml")) {
+        try(InputStream inputStream = App.class.getResourceAsStream("/views/main-view.fxml")) {
             mainRoot = fxmlLoader.load(inputStream);
         }
 

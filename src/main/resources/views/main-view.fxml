@@ -8,13 +8,14 @@
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="897.0" prefWidth="1016.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ge.tsu.texteditor.controller.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="897.0" prefWidth="1016.0" xmlns="http://javafx.com/javafx/17" stylesheets="@../css/style.css" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ge.tsu.texteditor.texteditor.controller.MainController">
    <children>
       <MenuBar fx:id="menuBar" layoutX="107.0" layoutY="1.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
               <MenuItem fx:id="open" mnemonicParsing="false" onAction="#open" text="Open" />
+                  <MenuItem fx:id="save" mnemonicParsing="false" onAction="#save" text="Save" />
             </items>
           </Menu>
         </menus>
