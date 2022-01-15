@@ -1,4 +1,4 @@
-package ge.tsu.texteditor.texteditor.db;
+package ge.tsu.texteditor.db;
 
 import lombok.Getter;
 import lombok.SneakyThrows;

@@ -9,6 +9,7 @@ module ge.tsu.texteditor {
     requires com.h2database;
     requires java.sql;
     requires java.naming;
+    requires javafx.media;
 
     opens ge.tsu.texteditor to javafx.fxml;
     opens ge.tsu.texteditor.controller to javafx.fxml;

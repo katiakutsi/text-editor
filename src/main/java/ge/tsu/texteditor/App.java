@@ -1,6 +1,6 @@
-package ge.tsu.texteditor.texteditor;
+package ge.tsu.texteditor;
 
-import ge.tsu.texteditor.texteditor.controller.MainController;
+import ge.tsu.texteditor.controller.MainController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

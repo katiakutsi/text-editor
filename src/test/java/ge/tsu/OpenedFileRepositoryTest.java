@@ -1,17 +1,18 @@
-package ge.tsu.texteditor;
+package ge.tsu;
 
-import ge.tsu.texteditor.texteditor.db.model.OpenedFile;
-import ge.tsu.texteditor.texteditor.db.repository.OpenedFileRepository;
+import ge.tsu.texteditor.db.model.OpenedFile;
+import ge.tsu.texteditor.db.repository.OpenedFileRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
+import java.nio.file.Path;
 import java.sql.SQLException;
 
 public class OpenedFileRepositoryTest {
 
     private static OpenedFileRepository OPENEDFILEREPOSITORY;
-    private static OpenedFile openedFile = new OpenedFile("/Users/tbc/Desktop/Screenshot 2021-10-22 at 12.49.00 AM");
+    private static OpenedFile openedFile = new OpenedFile(Path.of("/Users/tbc/Desktop/Screenshot 2021-10-22 at 12.49.00 AM"));
 
     @BeforeAll
     static void beforeAll() {

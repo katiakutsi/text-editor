@@ -1,17 +1,19 @@
-package ge.tsu.texteditor.texteditor.db.model;
+package ge.tsu.texteditor.db.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.nio.file.Path;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class OpenedFile {
     private int id;
-    private String fileName;
+    private Path filePath;
 
-    public OpenedFile(String fileName) {
-        this.fileName = fileName;
+    public OpenedFile(Path filePath) {
+        this.filePath = filePath;
     }
 }

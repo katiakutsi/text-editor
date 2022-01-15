@@ -1,4 +1,4 @@
-package ge.tsu.texteditor.texteditor.db;
+package ge.tsu.texteditor.db;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -23,13 +23,9 @@ public class DBConfig {
     private DBConfig() {
         Properties props = new Properties();
 
-
-
         try(InputStream inputStream = DBConfig.class.getResourceAsStream(isJUnitTest() ? "/test-db.properties" : "/db.properties")) {
             props.load(inputStream);
         }
-
-        System.out.println(isJUnitTest());
 
         jdbcUrl = props.getProperty("jdbc-url");
         username = props.getProperty("username");

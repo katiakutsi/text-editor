@@ -1,7 +1,7 @@
-package ge.tsu.texteditor.texteditor.controller;
+package ge.tsu.texteditor.controller;
 
-import ge.tsu.texteditor.texteditor.db.model.OpenedFile;
-import ge.tsu.texteditor.texteditor.db.repository.OpenedFileRepository;
+import ge.tsu.texteditor.db.model.OpenedFile;
+import ge.tsu.texteditor.db.repository.OpenedFileRepository;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -14,6 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +39,7 @@ public class MainController implements Initializable {
     private Path chosenFile = null;
     private List<File> selectedFiles = new ArrayList<>();
     private HashMap<File, Tab> openedTabs = new HashMap<>();
+    private HashMap<File, TreeItem> selectedTreeItems = new HashMap<>();
 
     public MainController() {
         fileOpenChooser = new FileChooser();
@@ -67,57 +69,58 @@ public class MainController implements Initializable {
         Path selectedItemPath = Path.of(getFullPathForSelectedTreeItem(selectedItem));
         File selectedFile = selectedItemPath.toFile();
 
-        if (selectedItem != null) {
-            try {
-                SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+        if (selectedItem != null && !selectedFile.isDirectory()) {
+            SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
 
-                if (!selectedFiles.contains(selectedFile)) {
-                    Tab tab = new Tab(selectedItem.getValue());
+            if (!selectedFiles.contains(selectedFile)) {
+                Tab tab = new Tab(selectedItem.getValue());
 
-                    if (getMimeType(selectedFile).equals("image")) {
-                        ImageView imageView = new ImageView();
-                        imageView.setFitWidth(tabPane.getWidth());
-                        imageView.setPreserveRatio(true);
-                        Image image = new Image(selectedFile.toURI().toString());
-                        imageView.setImage(image);
-                        tab.setContent(imageView);
-                    } else {
-                        TextArea textArea = new TextArea();
-                        textArea.setText(Files.readString(selectedFile.toPath()));
-                        tab.setContent(textArea);
-                    }
-
-                    tabPane.getTabs().add(tab);
-                    selectionModel.select(tab);
-
-                    openedTabs.put(selectedFile, tab);
-
-                    tab.setOnCloseRequest(new EventHandler<Event>() {
-                        @Override
-                        public void handle(Event arg0) {
-                            selectedFiles.remove(getFullPathForSelectedTreeItem(selectedItem));
-                        }
-                    });
-
-                    tab.setOnSelectionChanged(new EventHandler<Event>() {
-                        @Override
-                        public void handle(Event event) {
-//                            treeView.setSelectionModel();
-                        }
-                    });
-
-                    selectedFiles.add(selectedFile);
-                    log.info("Opened file: " + selectedFile.getName());
-                    dataBaseStuff(selectedFile);
+                if (getMimeType(selectedFile).equals("image")) {
+                    displayImageView(selectedFile, tab);
                 } else {
-                    for (Tab tab : tabPane.getTabs()) {
-                        if (tab.getText().equals(selectedFile.getName())) {
-                            selectionModel.select(tab);
+                    displayTextArea(selectedFile, tab);
+                }
+
+                tabPane.getTabs().add(tab);
+                selectionModel.select(tab);
+
+                openedTabs.put(selectedFile, tab);
+                selectedTreeItems.put(selectedFile, selectedItem);
+
+                tab.setOnCloseRequest(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event arg0) {
+                        for(Map.Entry<File, Tab> tabEntry: openedTabs.entrySet()) {
+                            if (tabEntry.getValue().equals(tab)) {
+                                selectedFiles.remove(tabEntry.getKey());
+                            }
                         }
+                    }
+                });
+
+                tab.setOnSelectionChanged(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        if (tab.isSelected()) {
+                            for(Map.Entry<File, TreeItem> treeItemEntry: selectedTreeItems.entrySet()) {
+                                if (treeItemEntry.getKey().equals(getKeyByValue(openedTabs, tab))) {
+                                    MultipleSelectionModel multipleSelectionModel = treeView.getSelectionModel();
+                                    int row = treeView.getRow(treeItemEntry.getValue());
+                                    multipleSelectionModel.select(row);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                selectedFiles.add(selectedFile);
+                dataBaseStuff(selectedFile);
+            } else {
+                for (Tab tab : tabPane.getTabs()) {
+                    if (tab.getText().equals(selectedFile.getName())) {
+                        selectionModel.select(tab);
                     }
                 }
-            } catch (IOException e) {
-                log.error("Can't read file: " + selectedFile.getName());
             }
         }
     }
@@ -137,8 +140,10 @@ public class MainController implements Initializable {
             File file = entry.getKey();
             Tab tab = entry.getValue();
 
-            TextArea textArea = (TextArea) tab.getContent();
-            Files.writeString(file.toPath(), textArea.getText());
+            if (tab.getContent().getClass().getSimpleName().equals("TextArea")) {
+                TextArea textArea = (TextArea) tab.getContent();
+                Files.writeString(file.toPath(), textArea.getText());
+            }
         }
     }
 
@@ -152,6 +157,28 @@ public class MainController implements Initializable {
         }
 
         treeView.setRoot(rootItem);
+    }
+
+    private void displayImageView(File selectedFile, Tab tab) {
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(tabPane.getWidth());
+        imageView.setPreserveRatio(true);
+        Image image = new Image(selectedFile.toURI().toString());
+        imageView.setImage(image);
+        tab.setContent(imageView);
+        log.info("Opened file: " + selectedFile);
+    }
+
+    private void displayTextArea(File selectedFile, Tab tab) {
+        TextArea textArea = new TextArea();
+        try {
+            textArea.setText(Files.readString(selectedFile.toPath()));
+            log.info("Opened file: " + selectedFile);
+        } catch (IOException e) {
+            textArea.setText("sorry, can't read file :(");
+            log.error("Can't read file: " + selectedFile);
+        }
+        tab.setContent(textArea);
     }
 
     private void makeFileTree(File file, TreeItem parent) {
@@ -193,7 +220,17 @@ public class MainController implements Initializable {
     @SneakyThrows
     private void dataBaseStuff(File file) {
         openedFileRepository.createTable();
-        openedFileRepository.save(new OpenedFile(file.getName()));
+        openedFileRepository.save(new OpenedFile(file.toPath()));
+    }
+
+    // https://stackoverflow.com/questions/1383797/java-hashmap-how-to-get-key-from-value
+    private static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+        for (Map.Entry<T, E> entry : map.entrySet()) {
+            if (Objects.equals(value, entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
 }
